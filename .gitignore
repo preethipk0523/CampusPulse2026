@@ -1,0 +1,19 @@
+.aws-sam/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+samconfig.toml
+.DS_Store
+# Other environment files
+.env.*
+!.env.example
+
+# IDE and OS files
+.vscode/
+Thumbs.db
+
+# Python environment and cache
+venv/
+__pycache__/
+*.py[cod]

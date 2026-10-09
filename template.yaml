@@ -1,0 +1,129 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: CampusPulse 2026 - serverless campus events prototype
+
+Parameters:
+  OperatorPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    Description: Demo password for the operator role
+
+  OperatorToken:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: Random bearer token for the operator role
+
+  AdminPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    Description: Demo password for the administrator role
+
+  AdminToken:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: Random bearer token for the administrator role
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 15
+    MemorySize: 256
+    Environment:
+      Variables:
+        EVENTS_TABLE: !Ref CampusPulseEvents
+        OPERATOR_PASSWORD: !Ref OperatorPassword
+        OPERATOR_TOKEN: !Ref OperatorToken
+        ADMIN_PASSWORD: !Ref AdminPassword
+        ADMIN_TOKEN: !Ref AdminToken
+
+Resources:
+  CampusPulseEvents:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: CampusPulseEvents
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: event_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: event_id
+          KeyType: HASH
+
+  CampusPulseApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      EndpointConfiguration: REGIONAL
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  CampusPulseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/
+      Handler: main.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CampusPulseEvents
+      Events:
+        Health:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CampusPulseApi
+            Path: /health
+            Method: GET
+
+        Login:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CampusPulseApi
+            Path: /login
+            Method: POST
+
+        CreateEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CampusPulseApi
+            Path: /events
+            Method: POST
+
+        ListEvents:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CampusPulseApi
+            Path: /events
+            Method: GET
+
+        Stats:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CampusPulseApi
+            Path: /stats
+            Method: GET
+
+        Alerts:
+          Type: Api
+          Properties:
+            RestApiId: !Ref CampusPulseApi
+            Path: /alerts
+            Method: GET
+
+Outputs:
+  ApiBaseUrl:
+    Description: Base URL for CampusPulse API
+    Value: !Sub "https://${CampusPulseApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+
+  EventsTableName:
+    Description: DynamoDB table name
+    Value: !Ref CampusPulseEvents
+
+  LambdaFunctionName:
+    Description: CampusPulse Lambda function
+    Value: !Ref CampusPulseFunction
