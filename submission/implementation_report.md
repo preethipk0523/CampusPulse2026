@@ -94,7 +94,10 @@ graph LR
     end
 ```
 
-**Architecture Diagram File:** [`submission/architecture_diagram.svg`](architecture_diagram.svg)  
+**Architecture Diagram File:** [my_architecture.jpeg](my_architecture.jpeg)
+
+![CampusPulse 2026 Architecture](my_architecture.jpeg)
+
 *Figure 2.1: CampusPulse 2026 verified live architecture and isolated future roadmap.*
 
 The diagram above represents only components that exist in the deployed system. Proposed future enhancements are strictly isolated in a separate section labeled as not implemented.
