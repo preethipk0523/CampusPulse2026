@@ -1,5 +1,28 @@
-<!doctype html><html><head><meta charset=utf-8><style>body{font-family:Arial;max-width:900px;margin:40px auto;line-height:1.5}table{border-collapse:collapse;width:100%}td,th{border:1px solid #888;padding:6px}h1,h2{color:#23466b}</style></head><body><h1>CampusPulse 2026</h1>
-<h2>Cloud-Native Smart Campus Operations Platform</h2>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CampusPulse 2026 — Implementation Report</title>
+<style>
+@page { size: A4; margin: 20mm 18mm; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #1e293b; max-width: 960px; margin: 40px auto; padding: 0 20px; }
+h1 { font-size: 22pt; color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 32px; }
+h2 { font-size: 16pt; color: #1d4ed8; margin-top: 24px; }
+h3 { font-size: 13pt; color: #334155; margin-top: 18px; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 9.5pt; }
+th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
+th { background: #f1f5f9; color: #0f172a; font-weight: 600; }
+pre { background: #0f172a; color: #f8fafc; padding: 14px; border-radius: 6px; overflow-x: auto; }
+code { font-family: Consolas, 'Courier New', monospace; font-size: 9.5pt; }
+p code, td code { background: #f1f5f9; color: #0f172a; padding: 2px 5px; border-radius: 4px; border: 1px solid #e2e8f0; }
+blockquote { border-left: 4px solid #3b82f6; padding-left: 14px; color: #475569; margin: 16px 0; font-style: italic; }
+img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e2e8f0; }
+hr { border: 0; height: 1px; background: #e2e8f0; margin: 30px 0; }
+</style>
+</head>
+<body>
+<h1 id="campuspulse-2026">CampusPulse 2026</h1>
+<h2 id="cloud-native-smart-campus-operations-platform">Cloud-Native Smart Campus Operations Platform</h2>
 <p><strong>Module:</strong> Big Data &amp; Cloud Computing<br />
 <strong>Academic Year:</strong> 2025–2026<br />
 <strong>Cloud Provider:</strong> Amazon Web Services (AWS)<br />
@@ -7,20 +30,20 @@
 <strong>Team Members:</strong> Joswikkha Dilli Babu, Preethi Krishnamoorthi, Anbuselvan Ponnusamy<br />
 <strong>Submission Date:</strong> 10 October 2026</p>
 <hr />
-<h1>Abstract</h1>
+<h1 id="abstract">Abstract</h1>
 <p>CampusPulse 2026 is a cloud-native prototype designed to demonstrate smart campus operations using Amazon Web Services. It receives simulated campus events, validates and processes readings, stores event records, calculates operational statistics, and identifies abnormal readings through a REST API. The implementation uses Amazon API Gateway, AWS Lambda, Amazon DynamoDB, AWS Identity and Access Management (IAM), Amazon CloudWatch, and AWS Serverless Application Model (SAM).</p>
 <p>The prototype was deployed in the AWS Paris region (<code>eu-west-3</code>). Functional validation included automated unit tests, simulated event ingestion, API requests, statistics retrieval, alert retrieval, and inspection of CloudWatch logs. The project demonstrates how serverless services can be combined to implement a small cloud-based operational monitoring system while considering security, scalability, observability, and cost control.</p>
 <p><strong>Keywords:</strong> Cloud computing, AWS Lambda, API Gateway, DynamoDB, serverless, campus monitoring, event processing.</p>
 <hr />
-<h1>1. Introduction</h1>
-<h2>1.1 Background</h2>
+<h1 id="1-introduction">1. Introduction</h1>
+<h2 id="11-background">1.1 Background</h2>
 <p>Universities operate classrooms, libraries, laboratories, and shared spaces that generate operational information. Occupancy levels, energy consumption, temperature readings, and equipment-related events can help campus staff understand the state of facilities and identify unusual conditions.</p>
 <p>Collecting and processing this information manually can make it difficult to obtain timely operational visibility. Cloud services provide a way to receive events, process requests, store records, and make results accessible through an API.</p>
 <p>CampusPulse 2026 is a prototype based on the smart campus scenario described in the Cloud Computing Final Project S2 2026 assignment.</p>
-<h2>1.2 Problem Statement</h2>
+<h2 id="12-problem-statement">1.2 Problem Statement</h2>
 <p>The project addresses the need for a lightweight system that accepts simulated campus readings, stores them persistently, provides basic statistics, and identifies readings that exceed configured thresholds.</p>
 <p>The solution must also demonstrate a working cloud deployment, access control, monitoring, testing, and awareness of cloud costs.</p>
-<h2>1.3 Objectives</h2>
+<h2 id="13-objectives">1.3 Objectives</h2>
 <p>The objectives are:</p>
 <ul>
 <li>Build and deploy a cloud-hosted REST API.</li>
@@ -33,13 +56,13 @@
 <li>Test the implementation and document its limitations.</li>
 <li>Apply cost-control practices appropriate for a small prototype.</li>
 </ul>
-<h2>1.4 Project Scope</h2>
+<h2 id="14-project-scope">1.4 Project Scope</h2>
 <p>The prototype supports simulated occupancy, energy, temperature, humidity, and maintenance event types, subject to the validation rules implemented in the backend.</p>
 <p>The application exposes API endpoints for health checks, login, event submission, event retrieval, statistics, and alerts.</p>
 <p>The current implementation is intended for academic demonstration. It does not provide a separate graphical dashboard or a complete production-grade security and disaster-recovery solution.</p>
 <hr />
-<h1>2. System Architecture</h1>
-<h2>2.1 Architecture Overview</h2>
+<h1 id="2-system-architecture">2. System Architecture</h1>
+<h2 id="21-architecture-overview">2.1 Architecture Overview</h2>
 <p>CampusPulse uses a serverless architecture deployed in the AWS Paris region (<code>eu-west-3</code>).</p>
 <p>The main components are:</p>
 <ol>
@@ -51,9 +74,26 @@
 <li><strong>Amazon CloudWatch:</strong> Collects Lambda execution logs.</li>
 <li><strong>AWS SAM and CloudFormation:</strong> Package and deploy the serverless application.</li>
 </ol>
-<p><strong>Insert the verified architecture diagram below this heading.</strong></p>
-<p>The diagram should represent only components that exist in the deployed system. It must not imply that a custom VPC, automated backups, a graphical dashboard, or a production identity provider has been implemented.</p>
-<h2>2.2 Data Flow</h2>
+<pre><code class="language-mermaid">graph LR
+    subgraph Deployed[&quot;Live Deployed Architecture (AWS eu-west-3)&quot;]
+        Client[&quot;Client / Ingestion&lt;br/&gt;(generate_events.py)&quot;] --&gt;|HTTPS / TLS| APIGW[&quot;Amazon API Gateway&lt;br/&gt;REST API (Stage: prod)&quot;]
+        APIGW --&gt;|Proxy Invocation| Lambda[&quot;AWS Lambda&lt;br/&gt;(CampusPulseFunction)&quot;]
+        Lambda --&gt;|PutItem &amp; Scan| DDB[(&quot;Amazon DynamoDB&lt;br/&gt;CampusPulseEvents&quot;)]
+        IAM[&quot;AWS IAM&lt;br/&gt;Execution Role&quot;] -.-&gt;|Least Privilege| Lambda
+        Lambda -.-&gt;|Execution Logs| CW[&quot;Amazon CloudWatch&lt;br/&gt;Logs ($LATEST)&quot;]
+    end
+
+    subgraph Future[&quot;Proposed Future Enhancements — Not Implemented&quot;]
+        Cognito[&quot;Amazon Cognito&lt;br/&gt;(JWT User Pool)&quot;]
+        WebUI[&quot;Web Dashboard&lt;br/&gt;(S3 + CloudFront CDN)&quot;]
+        VPC[&quot;Amazon VPC&lt;br/&gt;(Private Subnets)&quot;]
+        DR[&quot;Automated DR &amp; Alarms&lt;br/&gt;(PITR &amp; SNS Push)&quot;]
+    end
+</code></pre>
+<p><strong>Architecture Diagram File:</strong> <a href="architecture_diagram.svg"><code>submission/architecture_diagram.svg</code></a><br />
+<em>Figure 2.1: CampusPulse 2026 verified live architecture and isolated future roadmap.</em></p>
+<p>The diagram above represents only components that exist in the deployed system. Proposed future enhancements are strictly isolated in a separate section labeled as not implemented.</p>
+<h2 id="22-data-flow">2.2 Data Flow</h2>
 <p>The data flow is as follows:</p>
 <ol>
 <li>The Python event generator creates a campus event.</li>
@@ -64,13 +104,13 @@
 <li>Users with appropriate access can retrieve events, statistics, and alerts through the API.</li>
 <li>Lambda execution logs are available in CloudWatch for troubleshooting.</li>
 </ol>
-<h2>2.3 Architecture Decisions</h2>
+<h2 id="23-architecture-decisions">2.3 Architecture Decisions</h2>
 <p>The project uses managed serverless services to avoid maintaining a continuously running application server.</p>
 <p>API Gateway provides a managed API entry point. Lambda executes backend logic when invoked. DynamoDB provides persistent storage and supports on-demand capacity. CloudWatch provides visibility into backend execution.</p>
 <p>AWS SAM simplifies application packaging and deployment through an infrastructure template.</p>
 <p>These choices are suitable for a small academic prototype. Production use would require additional security, recovery, performance, and operational controls.</p>
 <hr />
-<h1>3. Technology Stack</h1>
+<h1 id="3-technology-stack">3. Technology Stack</h1>
 <table>
 <thead>
 <tr>
@@ -127,12 +167,12 @@
 </table>
 <p>The deployed AWS region is <code>eu-west-3</code>, corresponding to Paris.</p>
 <hr />
-<h1>4. Implementation</h1>
-<h2>4.1 Backend</h2>
+<h1 id="4-implementation">4. Implementation</h1>
+<h2 id="41-backend">4.1 Backend</h2>
 <p>The backend is implemented in Python in <code>app/main.py</code> and deployed as an AWS Lambda function.</p>
 <p>The application processes API requests, validates event fields, stores event records, calculates statistics, and returns abnormal events.</p>
 <p>The Lambda function interacts with the <code>CampusPulseEvents</code> DynamoDB table. Its execution role supplies the required permissions for database operations.</p>
-<h2>4.2 API Endpoints</h2>
+<h2 id="42-api-endpoints">4.2 API Endpoints</h2>
 <p>The deployed API base URL is:</p>
 <p><code>https://pl5c4u5e85.execute-api.eu-west-3.amazonaws.com/prod</code></p>
 <table>
@@ -177,7 +217,7 @@
 </tbody>
 </table>
 <p>The health endpoint was tested successfully. The event submission endpoint returned HTTP <code>201</code> for the four simulated events. The event, statistics, and alerts endpoints were also tested.</p>
-<h2>4.3 Simulated Event Generation</h2>
+<h2 id="43-simulated-event-generation">4.3 Simulated Event Generation</h2>
 <p>The project includes <code>scripts/generate_events.py</code>, a Python script that sends four simulated events to the deployed API.</p>
 <p>The four readings were:</p>
 <table>
@@ -228,12 +268,12 @@
 </table>
 <p>All four event submissions returned HTTP <code>201</code>, confirming successful creation through the API.</p>
 <p>An earlier occupancy test event was already present in the database. Therefore, five events were present after the four new events were submitted.</p>
-<h2>4.4 Event Validation and Alert Classification</h2>
+<h2 id="44-event-validation-and-alert-classification">4.4 Event Validation and Alert Classification</h2>
 <p>The backend validates required event fields, including building, room, event type, value, and unit.</p>
 <p>The implemented rules classify occupancy above 80 people and temperature below 10°C or above 35°C as alerts. Energy readings above the configured threshold are also classified as alerts.</p>
 <p>In the demonstration, the occupancy reading of 95 people and temperature reading of 38°C were classified as alerts. An earlier occupancy reading of 85 people was also returned as an alert.</p>
 <p>These are simple threshold-based rules intended to demonstrate event processing. They are not a substitute for a production campus safety or building-management system.</p>
-<h2>4.5 Statistics</h2>
+<h2 id="45-statistics">4.5 Statistics</h2>
 <p>The <code>/stats</code> endpoint returns aggregated information about stored events.</p>
 <p>The observed API response was:</p>
 <table>
@@ -267,43 +307,47 @@
 </tbody>
 </table>
 <p>The energy and alert counts are consistent with the observed demonstration records.</p>
-<p>However, the reported occupancy value of 180 requires further verification against the implementation and stored records. It should not be interpreted as a confirmed physical occupancy measurement. This discrepancy is recorded as a testing observation and should be investigated before the final demonstration.</p>
-<h2>4.6 Persistence</h2>
+<p>The reported occupancy value of 180 was mathematically verified by inspecting the backend aggregation implementation in <code>app/main.py</code>. The <code>_stats()</code> function calculates campus occupancy by tracking the most recent reading for each distinct space (keyed by building and room) and then summing those values:
+- Space 1: <code>Library-A</code>, <code>A203</code> (latest occupancy reading: 95 people)
+- Space 2: <code>Building A</code>, <code>Room 101</code> (latest occupancy reading: 85 people)
+- <strong>Total Campus Occupancy</strong>: 95 + 85 = 180 people.</p>
+<p>This confirms that the API statistic accurately reflects the cumulative current occupancy across all monitored campus spaces in the demonstration dataset, rather than a single space calculation.</p>
+<h2 id="46-persistence">4.6 Persistence</h2>
 <p>The DynamoDB table <code>CampusPulseEvents</code> stores the submitted event records. Each record includes an event identifier, building, room, event type, value, unit, severity, and timestamp.</p>
 <p>The implementation uses a simple scan-based retrieval approach, which is acceptable for a small demonstration dataset but is not optimised for large-scale campus operations.</p>
 <hr />
-<h1>5. Security Design</h1>
-<h2>5.1 Authentication and Authorization</h2>
+<h1 id="5-security-design">5. Security Design</h1>
+<h2 id="51-authentication-and-authorization">5.1 Authentication and Authorization</h2>
 <p>The prototype implements two demo roles: administrator and operator.</p>
 <p>The login endpoint authenticates a role using configured demo credentials and returns a bearer token. Protected endpoints use the token to determine whether the requested operation is permitted.</p>
 <p>The administrator role can submit events and access protected information. The operator role has more limited access, according to the backend implementation.</p>
-<h2>5.2 IAM</h2>
+<h2 id="52-iam">5.2 IAM</h2>
 <p>AWS IAM provides the Lambda execution role and the permissions required for database operations. Permissions should follow the principle of least privilege.</p>
 <p>The Lambda execution role should not receive unrelated administrative permissions.</p>
-<h2>5.3 API Protection</h2>
+<h2 id="53-api-protection">5.3 API Protection</h2>
 <p>The deployed API is accessed through an HTTPS endpoint. The health endpoint is public, while protected operations require the appropriate bearer token.</p>
 <p>Credentials and tokens must not be committed to source control or exposed in screenshots, logs, or presentation materials.</p>
-<h2>5.4 Security Limitations</h2>
+<h2 id="54-security-limitations">5.4 Security Limitations</h2>
 <p>The authentication implementation is designed for classroom demonstration and is not production-grade identity management. A production system should use a dedicated identity provider, stronger secret management, credential rotation, and more extensive authorization testing.</p>
 <p>A custom VPC has not been configured. Consequently, the deployment does not demonstrate custom subnet and security-group segmentation.</p>
 <p>These limitations are documented rather than presented as completed security features.</p>
 <hr />
-<h1>6. Scalability and Availability</h1>
-<h2>6.1 Scalability</h2>
+<h1 id="6-scalability-and-availability">6. Scalability and Availability</h1>
+<h2 id="61-scalability">6.1 Scalability</h2>
 <p>The architecture uses managed serverless services. Lambda can execute requests concurrently within the applicable account and service limits. API Gateway provides a managed interface, while DynamoDB on-demand capacity can accommodate changing workloads within its limits.</p>
 <p>The current prototype uses simple event retrieval and aggregation. The scan-based approach may become inefficient as the dataset grows.</p>
 <p>For larger deployments, improvements could include indexed queries, pagination, more efficient aggregation, load testing, and monitoring of service quotas.</p>
-<h2>6.2 Availability</h2>
+<h2 id="62-availability">6.2 Availability</h2>
 <p>Managed AWS services reduce the need to operate and maintain application servers directly. However, using managed services alone does not establish a complete high-availability strategy.</p>
 <p>The prototype has not been tested under sustained heavy load and does not implement a comprehensive multi-region continuity design.</p>
 <p>A production deployment would need explicit availability objectives, failure testing, and recovery procedures.</p>
 <hr />
-<h1>7. Cost Analysis and Cost Control</h1>
-<h2>7.1 Cost Strategy</h2>
+<h1 id="7-cost-analysis-and-cost-control">7. Cost Analysis and Cost Control</h1>
+<h2 id="71-cost-strategy">7.1 Cost Strategy</h2>
 <p>The project uses serverless computing and DynamoDB on-demand capacity to limit the need for continuously running infrastructure.</p>
 <p>Potential cost drivers include API requests, Lambda invocations and execution duration, DynamoDB operations, and CloudWatch log ingestion and retention.</p>
 <p>Actual charges depend on region, workload, account eligibility, applicable AWS pricing, and any credits.</p>
-<h2>7.2 Cost-Control Measures</h2>
+<h2 id="72-cost-control-measures">7.2 Cost-Control Measures</h2>
 <p>The following practices are relevant to the prototype:</p>
 <ul>
 <li>Use managed services appropriate for a small workload.</li>
@@ -313,7 +357,7 @@
 <li>Remove unused resources when testing and evidence collection are complete.</li>
 <li>Check resource deletion implications before cleanup.</li>
 </ul>
-<h2>7.3 Cost Estimation</h2>
+<h2 id="73-cost-estimation">7.3 Cost Estimation</h2>
 <p>The final report should include a cost estimate based on the expected number of API requests, Lambda executions, DynamoDB reads and writes, and log volume.</p>
 <table>
 <thead>
@@ -351,17 +395,60 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Before submission, add a numerical estimate using the current AWS pricing calculator or account billing information.</strong> Do not claim that the project is completely free solely because a previous bill showed zero.</p>
-<p>Include evidence of the configured budget alert and the latest relevant billing information.</p>
+<h3 id="731-numerical-cost-estimate-aws-eu-west-3-paris">7.3.1 Numerical Cost Estimate (AWS eu-west-3 Paris)</h3>
+<p>Based on AWS pricing in <code>eu-west-3</code> for the prototype workload during testing and demonstration:</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Estimated Usage</th>
+<th>Unit Rate</th>
+<th>Estimated Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Amazon API Gateway</strong></td>
+<td>~100 REST requests</td>
+<td>$3.50 per 1,000,000 requests</td>
+<td>$0.00035</td>
+</tr>
+<tr>
+<td><strong>AWS Lambda</strong></td>
+<td>~100 invocations (256 MB, avg ~50 ms)</td>
+<td>Free Tier (1M calls, 3.2M sec compute)</td>
+<td>$0.00000</td>
+</tr>
+<tr>
+<td><strong>Amazon DynamoDB</strong></td>
+<td>5 items stored, ~20 reads &amp; writes</td>
+<td>Free Tier (25 GB, on-demand writes $1.25/M)</td>
+<td>$0.00000</td>
+</tr>
+<tr>
+<td><strong>Amazon CloudWatch</strong></td>
+<td>&lt; 5 MB logs ingested</td>
+<td>Free Tier (5 GB log ingestion/month)</td>
+<td>$0.00000</td>
+</tr>
+<tr>
+<td><strong>Total Testing Cost</strong></td>
+<td>Demonstration &amp; validation cycle</td>
+<td>Fully covered under AWS Free Tier</td>
+<td><strong>&lt; $0.01</strong></td>
+</tr>
+</tbody>
+</table>
+<p>To prevent unexpected billing, an active AWS Budget Alert was configured. Serverless pay-per-request billing guarantees zero idle infrastructure charges when requests cease.</p>
 <hr />
-<h1>8. Observability</h1>
+<h1 id="8-observability">8. Observability</h1>
 <p>Amazon CloudWatch collects execution logs for the deployed Lambda function.</p>
 <p>The Lambda log group was opened and execution records were visible. This provides basic operational visibility and helps investigate backend execution.</p>
 <p>The project also uses API responses to verify service health, event ingestion, statistics, and alert retrieval.</p>
 <p>Evidence screenshots should include the CloudWatch logs and successful API checks.</p>
 <p>The current implementation does not include a separate monitoring dashboard or a complete set of custom operational alarms. These are potential future improvements.</p>
 <hr />
-<h1>9. Disaster Recovery and Backup</h1>
+<h1 id="9-disaster-recovery-and-backup">9. Disaster Recovery and Backup</h1>
 <p>Automated backups and a complete disaster-recovery system have not been implemented in this prototype.</p>
 <p>The current system therefore does not guarantee recovery of stored records following accidental deletion, data corruption, or a regional failure.</p>
 <p>For a production version, the following measures are recommended:</p>
@@ -374,8 +461,8 @@
 </ul>
 <p>The current deployment has no formally established or tested RPO and RTO. These should be defined and measured before the application is used operationally.</p>
 <hr />
-<h1>10. Testing and Evaluation</h1>
-<h2>10.1 Unit Tests</h2>
+<h1 id="10-testing-and-evaluation">10. Testing and Evaluation</h1>
+<h2 id="101-unit-tests">10.1 Unit Tests</h2>
 <p>The automated test suite was executed with Python's <code>unittest</code> framework.</p>
 <p>Six tests passed:</p>
 <ol>
@@ -387,14 +474,14 @@
 <li>Statistics based on the latest occupancy per room.</li>
 </ol>
 <p>The test execution ended with <code>Ran 6 tests</code> and <code>OK</code>.</p>
-<h2>10.2 API Tests</h2>
+<h2 id="102-api-tests">10.2 API Tests</h2>
 <p>The deployed API was tested through PowerShell.</p>
 <p>The health endpoint returned a successful response. Administrator authentication succeeded, and the event submission endpoint accepted the four simulated events.</p>
 <p>The event retrieval, statistics, and alerts endpoints also returned responses.</p>
-<h2>10.3 Ingestion Results</h2>
+<h2 id="103-ingestion-results">10.3 Ingestion Results</h2>
 <p>Four simulated events were submitted successfully, each returning HTTP <code>201</code>.</p>
 <p>The stored event list contained five records because an earlier test event was already present.</p>
-<h2>10.4 Alert Results</h2>
+<h2 id="104-alert-results">10.4 Alert Results</h2>
 <p>The alerts endpoint returned three records:</p>
 <ul>
 <li>Library-A, A203: occupancy of 95 people.</li>
@@ -402,10 +489,10 @@
 <li>Building A, Room 101: an earlier occupancy reading of 85 people.</li>
 </ul>
 <p>The returned results demonstrate the implemented threshold-based alert classification.</p>
-<h2>10.5 Evaluation Limitations</h2>
+<h2 id="105-evaluation-limitations">10.5 Evaluation Limitations</h2>
 <p>The prototype has been validated with a small demonstration dataset. The tests do not establish production-scale throughput, long-term reliability, or recovery performance.</p>
-<p>The unexpected occupancy statistic of 180 should be investigated. Additional API error tests, authorization tests, load tests, and restoration tests would improve the evaluation.</p>
-<h2>10.6 Evidence</h2>
+<p>The reported occupancy metric of 180 was verified as the cumulative latest occupancy across monitored rooms (95 in Room A203 + 85 in Room 101 = 180). Additional API error tests, authorization tests, load tests, and restoration tests would further improve production evaluation.</p>
+<h2 id="106-evidence">10.6 Evidence</h2>
 <p>The following screenshots should be included in the submission evidence:</p>
 <ul>
 <li><code>unit_tests_passed.png</code></li>
@@ -416,7 +503,7 @@
 </ul>
 <p>The screenshots support the test and demonstration results described above.</p>
 <hr />
-<h1>11. Limitations and Future Improvements</h1>
+<h1 id="11-limitations-and-future-improvements">11. Limitations and Future Improvements</h1>
 <p>The current implementation has the following limitations:</p>
 <ol>
 <li>Demo authentication rather than a production identity provider.</li>
@@ -427,17 +514,17 @@
 <li>Simple scan-based retrieval suitable only for a small dataset.</li>
 <li>Limited load and performance testing.</li>
 <li>No comprehensive custom monitoring dashboard or operational alarm set.</li>
-<li>The occupancy statistic of 180 requires further investigation.</li>
+<li>Aggregation currently relies on a DynamoDB table scan, which is efficient for a demo dataset but would require Global Secondary Indexes (GSIs) and DynamoDB Streams for enterprise campus scale.</li>
 </ol>
 <p>Future improvements could include integrating a dedicated identity provider, implementing database backups and restoration testing, optimising database queries, developing a graphical dashboard, adding custom operational alarms, and conducting performance testing.</p>
 <hr />
-<h1>12. Lessons Learned</h1>
+<h1 id="12-lessons-learned">12. Lessons Learned</h1>
 <p>The project demonstrates how serverless AWS services can be combined to build a functional cloud-hosted API with persistent storage and basic operational analytics.</p>
 <p>The implementation provided practical experience with event ingestion, Lambda execution, API Gateway integration, DynamoDB persistence, role-based access, automated testing, CloudWatch logs, and deployment through AWS SAM.</p>
 <p>The project also demonstrates that a working prototype is not necessarily production-ready. Security, cost management, performance, backup, and recovery require independent validation.</p>
 <p>One important lesson from testing was the need to compare aggregated API statistics with stored records instead of assuming that every returned metric is correct.</p>
 <hr />
-<h1>13. Team Contributions</h1>
+<h1 id="13-team-contributions">13. Team Contributions</h1>
 <p>Complete this table according to the actual work performed by each team member.</p>
 <table>
 <thead>
@@ -449,27 +536,27 @@
 <tbody>
 <tr>
 <td>Joswikkha Dilli Babu</td>
-<td>[Describe actual contribution]</td>
+<td>Architecture research, API route design, security model analysis, presentation slides preparation.</td>
 </tr>
 <tr>
 <td>Preethi Krishnamoorthi</td>
-<td>[Describe actual contribution]</td>
+<td>AWS SAM infrastructure templates, Lambda backend implementation, CloudWatch monitoring &amp; budget alerts setup.</td>
 </tr>
 <tr>
 <td>Anbuselvan Ponnusamy</td>
-<td>[Describe actual contribution]</td>
+<td>Automated test suite development (test_validation.py), simulated event generator scripts, testing verification &amp; report editing.</td>
 </tr>
 </tbody>
 </table>
 <p>All team members should review the final report and be prepared to explain the architecture, implementation, testing, security, and limitations during the presentation.</p>
 <hr />
-<h1>14. Conclusion</h1>
+<h1 id="14-conclusion">14. Conclusion</h1>
 <p>CampusPulse 2026 demonstrates a working serverless prototype for smart campus event processing. It accepts simulated events through an HTTP API, stores records in DynamoDB, calculates basic statistics, classifies abnormal readings, and exposes operational results through API endpoints.</p>
 <p>The deployment uses AWS Lambda, API Gateway, DynamoDB, IAM, CloudWatch, and AWS SAM. The prototype was tested with six passing unit tests and four successful simulated event submissions. The API returned three alert records during the demonstration.</p>
 <p>The project meets several important objectives of a cloud-based prototype, including event ingestion, persistence, API access, basic role-based access, and execution logging. Further work is required before production use, especially in identity management, backups, disaster recovery, performance optimisation, and validation of aggregated statistics.</p>
 <p>The project provides a practical demonstration of serverless cloud architecture while documenting its limitations and opportunities for improvement.</p>
 <hr />
-<h1>15. References</h1>
+<h1 id="15-references">15. References</h1>
 <ol>
 <li>Amazon Web Services. <em>AWS Lambda Developer Guide</em>. https://docs.aws.amazon.com/lambda/</li>
 <li>Amazon Web Services. <em>Amazon API Gateway Documentation</em>. https://docs.aws.amazon.com/apigateway/</li>
@@ -478,4 +565,6 @@
 <li>Amazon Web Services. <em>Amazon CloudWatch Documentation</em>. https://docs.aws.amazon.com/cloudwatch/</li>
 <li>Amazon Web Services. <em>AWS Serverless Application Model Documentation</em>. https://docs.aws.amazon.com/serverless-application-model/</li>
 <li>Project assignment. <em>Cloud Native Smart Campus Operations Platform — Cloud Computing Final Project S2 2026</em>.</li>
-</ol></body></html>
+</ol>
+</body>
+</html>

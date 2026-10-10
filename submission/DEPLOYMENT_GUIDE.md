@@ -43,26 +43,58 @@ Open PowerShell in the project directory and set the API URL:
 $ApiUrl = "https://pl5c4u5e85.execute-api.eu-west-3.amazonaws.com/prod"
 ```
 
-Check the health endpoint:
-
+### 5.1 Public Health Check
 ```powershell
 Invoke-RestMethod -Method Get -Uri "$ApiUrl/health"
 ```
+*Expected response:* `{"status": "ok", "service": "CampusPulse 2026"}`
 
-To test the remaining endpoints, authenticate using the demo credentials configured during deployment and send the returned token as a bearer token. Do not publish passwords or tokens in the report or source repository.
+### 5.2 Demo Authentication & Protected Endpoints
+Authenticate using the demo credentials configured during deployment. Pass `role` (`"operator"` or `"admin"`) and `password` in JSON format:
 
-The Python event generator is located at `scripts/generate_events.py`. It requires the `CAMPUSPULSE_URL` and `CAMPUSPULSE_ADMIN_TOKEN` environment variables.
+```powershell
+# Authenticate (example shown for operator role)
+$LoginPayload = @{
+    role = "operator"
+    password = "YOUR_OPERATOR_PASSWORD"
+} | ConvertTo-Json
+
+$AuthResponse = Invoke-RestMethod -Method Post -Uri "$ApiUrl/login" -ContentType "application/json" -Body $LoginPayload
+$Token = $AuthResponse.token
+$Headers = @{ Authorization = "Bearer $Token" }
+
+# Retrieve events, operational statistics, and abnormal alerts
+Invoke-RestMethod -Method Get -Uri "$ApiUrl/events" -Headers $Headers
+Invoke-RestMethod -Method Get -Uri "$ApiUrl/stats" -Headers $Headers | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Method Get -Uri "$ApiUrl/alerts" -Headers $Headers | ConvertTo-Json -Depth 5
+```
+
+> **Troubleshooting "Invalid credentials":**
+> 1. Ensure the JSON key is `"role"` (not `"username"`).
+> 2. Ensure the role value is strictly lowercase: `"operator"` or `"admin"`.
+> 3. Verify `-ContentType "application/json"` is included so PowerShell does not post form-encoded body text.
+> 4. Ensure you provide the configured `OperatorPassword` (demo password), not the `OperatorToken`.
+> 5. Do not publish passwords or tokens in reports, slides, or version control.
+
+### 5.3 Simulated Event Ingestion
+The Python event generator is located at `scripts/generate_events.py`. It requires the `CAMPUSPULSE_URL` and `CAMPUSPULSE_ADMIN_TOKEN` environment variables:
+
+```powershell
+$env:CAMPUSPULSE_URL = $ApiUrl
+$env:CAMPUSPULSE_ADMIN_TOKEN = "YOUR_ADMIN_TOKEN"
+python scripts/generate_events.py
+```
 
 ## 6. Validation Results
 
-The project was tested using automated unit tests and requests to the deployed API.
+The project was tested using automated unit tests and requests to the deployed live API:
 
-- Six unit tests passed.
-- Simulated campus events were accepted and stored.
-- Event retrieval was verified.
-- Operational statistics were retrieved.
-- Abnormal readings were returned by the alerts endpoint.
-- Lambda execution logs were inspected in CloudWatch.
+- **Automated Unit Tests**: All six unit tests passed (`test_validation.py`) verifying schema validation, negative value rejection, threshold triggers, and room aggregation.
+- **Simulated Ingestion**: Ingested four simulated events (occupancy, energy, temperature), all returning HTTP `201 Created`.
+- **Database Persistence**: Five total records verified in `CampusPulseEvents` (1 pre-existing baseline + 4 newly submitted).
+- **Statistics Aggregation**: `/stats` verified returning 5 total events, 1 energy reading (18.5 kWh), 3 alerts, and 180 total latest occupancy across distinct spaces (95 in Library-A A203 + 85 in Building A Room 101).
+- **Abnormal Alerts**: `/alerts` verified returning the 3 abnormal readings exceeding defined thresholds.
+- **CloudWatch Observability**: Lambda execution logs inspected in CloudWatch log group `/aws/lambda/campuspulse-2026-CampusPulseFunction-...`.
 
 ## 7. Security
 

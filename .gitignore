@@ -12,6 +12,7 @@ samconfig.toml
 # IDE and OS files
 .vscode/
 Thumbs.db
+~$*
 
 # Python environment and cache
 venv/

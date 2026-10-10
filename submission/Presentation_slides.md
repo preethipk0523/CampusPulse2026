@@ -29,17 +29,36 @@
 
 ---
 
-# Slide 3 — Architecture
-- Amazon API Gateway receives HTTP requests.
-- AWS Lambda handles validation, event processing and aggregation.
-- Amazon DynamoDB stores campus events.
-- AWS IAM provides permissions for AWS resource access.
-- Amazon CloudWatch collects Lambda execution logs.
-- AWS SAM and CloudFormation support deployment.
+# Slide 3 — Architecture: Live Deployed System vs Future Scope (2:00 - 3:30)
+- **Live Ingestion**: `generate_events.py` & PowerShell/cURL send TLS HTTPS requests.
+- **API Gateway**: REST API (stage `prod`, regional `eu-west-3`) exposes `/health`, `/login`, `/events`, `/stats`, `/alerts`.
+- **AWS Lambda**: `CampusPulseFunction` (Python 3.12, 256MB) validates input, runs threshold checks, and calculates campus statistics.
+- **Amazon DynamoDB**: `CampusPulseEvents` table (Pay-per-request / on-demand) persists telemetry.
+- **Cross-Cutting**: AWS IAM least-privilege execution role; Amazon CloudWatch captures live execution logs.
 
-**Visual:** Insert the CampusPulse architecture diagram.
+```mermaid
+graph LR
+    subgraph Deployed["Live Deployed Architecture (AWS eu-west-3)"]
+        Client["Client / Ingestion<br/>(generate_events.py)"] -->|HTTPS / TLS| APIGW["Amazon API Gateway<br/>REST API (Stage: prod)"]
+        APIGW -->|Proxy Invocation| Lambda["AWS Lambda<br/>(CampusPulseFunction)"]
+        Lambda -->|PutItem & Scan| DDB[("Amazon DynamoDB<br/>CampusPulseEvents")]
+        IAM["AWS IAM<br/>Execution Role"] -.->|Least Privilege| Lambda
+        Lambda -.->|Execution Logs| CW["Amazon CloudWatch<br/>Logs ($LATEST)"]
+    end
 
-**Speaker notes:** Walk through the request path: API Gateway → Lambda → DynamoDB. Explain that CloudWatch collects execution logs and IAM controls permissions.
+    subgraph Future["Proposed Future Enhancements — Not Implemented"]
+        Cognito["Amazon Cognito<br/>(JWT User Pool)"]
+        WebUI["Web Dashboard<br/>(S3 + CloudFront CDN)"]
+        VPC["Amazon VPC<br/>(Private Subnets)"]
+        DR["Automated DR & Alarms<br/>(PITR & SNS Push)"]
+    end
+```
+
+**Architecture Diagram File:** [`submission/architecture_diagram.svg`](file:///d:/CampusPulse2026_starter/submission/architecture_diagram.svg)  
+*(Also rendered natively on Slide 3 of `CampusPulse2026_Presentation.pptx`)*
+
+**Speaker notes (1.5 min):**
+Walk through the live request path: API Gateway receives requests, Lambda processes business logic and aggregates room occupancy, and DynamoDB stores events on-demand. CloudWatch collects execution logs, and IAM enforces least privilege. Highlight the clear visual demarcation: the lower section explicitly shows 'Proposed Future Enhancements — Not Implemented' (Cognito, S3/CloudFront dashboard, VPC, and automated backups). We take pride in reporting only what is actually deployed.
 
 ---
 
@@ -65,15 +84,18 @@
 
 ---
 
-# Slide 6 — Testing and Results
-- Six automated unit tests passed.
-- Simulated event submissions returned successful responses.
-- Event retrieval was verified.
-- Statistics endpoint returned event counts and aggregate values.
-- Alerts endpoint returned abnormal occupancy and temperature readings.
-- CloudWatch Lambda logs were inspected.
+# Slide 6 — Testing and Results (5:30 - 7:00)
+- Six automated unit tests passed in 0.001s (`Ran 6 tests ... OK`).
+- Four live simulated event submissions returned HTTP `201 Created`.
+- Five total events stored in DynamoDB (1 pre-existing baseline + 4 newly ingested).
+- Statistics endpoint returned: 5 total events, 1 energy reading (18.5 kWh), 3 alerts.
+- **Occupancy Metric Verified**: Total latest occupancy = 180 people.
+  - Calculated as latest reading per distinct room:
+  - Library-A A203 (latest: 95) + Building A Room 101 (latest: 85) = **180 people total**.
+- Alerts endpoint verified: 3 abnormal readings returned (Occ: 95, Temp: 38°C, baseline Occ: 85).
+- CloudWatch Lambda logs inspected and verified live.
 
-**Speaker notes:** Show the saved evidence screenshots for unit tests, events, statistics, alerts and CloudWatch.
+**Speaker notes (1.5 min):** Show the saved evidence screenshots for unit tests, events, statistics, alerts and CloudWatch. Proactively explain the 180 occupancy figure: the backend aggregation sums the latest reading across distinct rooms (95 in Room A203 + 85 in Room 101 = 180), proving end-to-end data integrity.
 
 ---
 
